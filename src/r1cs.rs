@@ -159,7 +159,7 @@ impl<G: Group> R1CSShape<G> {
             let (row, col, val) = M[i];
             (row, val * z[col])
           })
-          .fold(vec![G::Scalar::zero(); num_rows], |mut Mz, (r, v)| {
+          .fold(vec![G::Scalar::ZERO; num_rows], |mut Mz, (r, v)| {
             Mz[r] += v;
             Mz
           })
@@ -232,7 +232,7 @@ impl<G: Group> R1CSShape<G> {
 
     // verify if Az * Bz = u*Cz
     let res_eq: bool = {
-      let z = concat(vec![W.W.clone(), vec![G::Scalar::one()], U.X.clone()]);
+      let z = concat(vec![W.W.clone(), vec![G::Scalar::ONE], U.X.clone()]);
       let (Az, Bz, Cz) = self.multiply_vec(&z)?;
       assert_eq!(Az.len(), self.num_cons);
       assert_eq!(Bz.len(), self.num_cons);
@@ -271,7 +271,7 @@ impl<G: Group> R1CSShape<G> {
     };
 
     let (AZ_2, BZ_2, CZ_2) = {
-      let Z2 = concat(vec![W2.W.clone(), vec![G::Scalar::one()], U2.X.clone()]);
+      let Z2 = concat(vec![W2.W.clone(), vec![G::Scalar::ONE], U2.X.clone()]);
       self.multiply_vec(&Z2)?
     };
 
@@ -355,8 +355,8 @@ impl<G: Group> R1CSShape<G> {
     });
 
     // turn the bit vector into a scalar
-    let mut res = G::Scalar::zero();
-    let mut coeff = G::Scalar::one();
+    let mut res = G::Scalar::ZERO;
+    let mut coeff = G::Scalar::ONE;
     for bit in bv {
       if bit {
         res += coeff;
@@ -509,8 +509,8 @@ impl<G: Group> RelaxedR1CSWitness<G> {
   /// Produces a default RelaxedR1CSWitness given an R1CSShape
   pub fn default(S: &R1CSShape<G>) -> RelaxedR1CSWitness<G> {
     RelaxedR1CSWitness {
-      W: vec![G::Scalar::zero(); S.num_vars],
-      E: vec![G::Scalar::zero(); S.num_cons],
+      W: vec![G::Scalar::ZERO; S.num_vars],
+      E: vec![G::Scalar::ZERO; S.num_cons],
     }
   }
 
@@ -518,7 +518,7 @@ impl<G: Group> RelaxedR1CSWitness<G> {
   pub fn from_r1cs_witness(S: &R1CSShape<G>, witness: &R1CSWitness<G>) -> RelaxedR1CSWitness<G> {
     RelaxedR1CSWitness {
       W: witness.W.clone(),
-      E: vec![G::Scalar::zero(); S.num_cons],
+      E: vec![G::Scalar::ZERO; S.num_cons],
     }
   }
 
@@ -561,13 +561,13 @@ impl<G: Group> RelaxedR1CSWitness<G> {
   pub fn pad(&self, S: &R1CSShape<G>) -> RelaxedR1CSWitness<G> {
     let W = {
       let mut W = self.W.clone();
-      W.extend(vec![G::Scalar::zero(); S.num_vars - W.len()]);
+      W.extend(vec![G::Scalar::ZERO; S.num_vars - W.len()]);
       W
     };
 
     let E = {
       let mut E = self.E.clone();
-      E.extend(vec![G::Scalar::zero(); S.num_cons - E.len()]);
+      E.extend(vec![G::Scalar::ZERO; S.num_cons - E.len()]);
       E
     };
 
@@ -582,8 +582,8 @@ impl<G: Group> RelaxedR1CSInstance<G> {
     RelaxedR1CSInstance {
       comm_W,
       comm_E,
-      u: G::Scalar::zero(),
-      X: vec![G::Scalar::zero(); S.num_io],
+      u: G::Scalar::ZERO,
+      X: vec![G::Scalar::ZERO; S.num_io],
     }
   }
 
@@ -595,7 +595,7 @@ impl<G: Group> RelaxedR1CSInstance<G> {
   ) -> RelaxedR1CSInstance<G> {
     let mut r_instance = RelaxedR1CSInstance::default(gens, S);
     r_instance.comm_W = instance.comm_W;
-    r_instance.u = G::Scalar::one();
+    r_instance.u = G::Scalar::ONE;
     r_instance.X = instance.X.clone();
     r_instance
   }

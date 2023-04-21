@@ -11,17 +11,23 @@ license-file = "LICENSE"
 keywords = ["zkSNARKs", "cryptography", "proofs"]
 
 [dependencies]
-bellperson = { version = "0.24", default-features = false }
-ff = { version = "0.12.0", features = ["derive"] }
+#bellperson = { version = "0.24", default-features = false }
+#bellperson = { path = "../bellperson", default-features = false }
+bellperson = { git = "https://github.com/leonardoalt/bellperson", default-features = false }
+ff = { version = "0.13.0", features = ["derive"] }
 digest = "0.8.1"
 sha3 = "0.8.2"
 rayon = "1.3.0"
 rand_core = { version = "0.6.0", default-features = false }
 rand_chacha = "0.3"
 itertools = "0.9.0"
-subtle = "2.4"
-pasta_curves = { version = "0.5.2", features = ["repr-c", "serde"], package = "fil_pasta_curves" }
-neptune = { version = "8.1.0", default-features = false }
+#subtle = "2.4"
+#pasta_curves = { version = "0.5.2", features = ["repr-c", "serde"], package = "fil_pasta_curves" }
+#pasta_curves = { path = "../fil_pasta_curves", features = ["repr-c", "serde"], package = "fil_pasta_curves" }
+pasta_curves = { git = "https://github.com/leonardoalt/fil_pasta_curves", branch = "update_ff", features = ["repr-c", "serde"], package = "fil_pasta_curves" }
+#neptune = { version = "8.1.0", default-features = false }
+#halo2curves = { path = "../halo2curves" }
+neptune = { path = "../neptune", default-features = false }
 generic-array = "0.14.4"
 num-bigint = { version = "0.4", features = ["serde", "rand"] }
 num-traits = "0.2"
@@ -32,9 +38,13 @@ flate2 = "1.0"
 bitvec = "1.0"
 byteorder = "1.4.3"
 thiserror = "1.0" 
+grumpkin = { path = "../grumpkin" }
+#grumpkin = { git = "https://github.com/leonardoalt/grumpkin", branch = "hash_to_curves" }
 
 [target.'cfg(any(target_arch = "x86_64", target_arch = "aarch64"))'.dependencies]
-pasta-msm = { version = "0.1.0", package = "lurk-pasta-msm" }
+#pasta-msm = { version = "0.1.0", package = "lurk-pasta-msm" }
+#pasta-msm = { path = "../pasta-msm", package = "lurk-pasta-msm" }
+pasta-msm = { git = "http://github.com/leonardoalt/pasta-msm", branch = "ff", package = "lurk-pasta-msm" }
 
 [dev-dependencies]
 criterion = "0.3.1"

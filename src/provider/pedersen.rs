@@ -44,6 +44,7 @@ impl<G: Group> CommitmentGensTrait<G> for CommitmentGens<G> {
   type CompressedCommitment = CompressedCommitment<G::CompressedGroupElement>;
 
   fn new(label: &'static [u8], n: usize) -> Self {
+      println!("Label is {label:?}");
     CommitmentGens {
       gens: G::from_label(label, n.next_power_of_two()),
       _p: Default::default(),
@@ -116,9 +117,9 @@ impl<G: Group> AbsorbInROTrait<G> for Commitment<G> {
     ro.absorb(x);
     ro.absorb(y);
     ro.absorb(if is_infinity {
-      G::Base::one()
+      G::Base::ONE
     } else {
-      G::Base::zero()
+      G::Base::ZERO
     });
   }
 }

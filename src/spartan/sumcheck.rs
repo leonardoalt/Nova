@@ -89,7 +89,7 @@ impl<G: Group> SumcheckProof<G> {
             (eval_point_0, eval_point_2)
           })
           .reduce(
-            || (G::Scalar::zero(), G::Scalar::zero()),
+            || (G::Scalar::ZERO, G::Scalar::ZERO),
             |a, b| (a.0 + b.0, a.1 + b.1),
           );
 
@@ -176,7 +176,7 @@ impl<G: Group> SumcheckProof<G> {
             (eval_point_0, eval_point_2, eval_point_3)
           })
           .reduce(
-            || (G::Scalar::zero(), G::Scalar::zero(), G::Scalar::zero()),
+            || (G::Scalar::ZERO, G::Scalar::ZERO, G::Scalar::ZERO),
             |a, b| (a.0 + b.0, a.1 + b.1, a.2 + b.2),
           );
 
@@ -278,7 +278,7 @@ impl<G: Group> UniPoly<G> {
     (0..self.coeffs.len())
       .into_par_iter()
       .map(|i| self.coeffs[i])
-      .reduce(G::Scalar::zero, |a, b| a + b)
+      .reduce(|| G::Scalar::ZERO, |a, b| a + b)
   }
 
   pub fn evaluate(&self, r: &G::Scalar) -> G::Scalar {

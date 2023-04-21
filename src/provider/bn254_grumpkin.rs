@@ -1,12 +1,11 @@
 //! This module implements the Nova traits for pallas::Point, pallas::Scalar, vesta::Point, vesta::Scalar.
 use crate::{
-  errors::NovaError,
   provider::{
     keccak::Keccak256Transcript,
     pedersen::CommitmentEngine,
     poseidon::{PoseidonRO, PoseidonROCircuit},
   },
-  traits::{ChallengeTrait, CompressedGroup, Group, PrimeFieldExt, TranscriptEngineTrait},
+  traits::{CompressedGroup, Group, PrimeFieldExt},
 };
 use digest::{ExtendableOutput, Input};
 use ff::{PrimeField, FromUniformBytes};
@@ -16,38 +15,15 @@ use pasta_curves::{
   self,
   arithmetic::{CurveAffine, CurveExt},
   group::{cofactor::CofactorCurveAffine, Curve, Group as AnotherGroup, GroupEncoding},
-  pallas, vesta, Ep, EpAffine, Eq, EqAffine,
+  //pallas, vesta, Ep, EpAffine, Eq, EqAffine,
 };
 use rayon::prelude::*;
-use serde::{Deserialize, Serialize};
 use sha3::Shake256;
 use std::io::Read;
 
-/// A wrapper for compressed group elements of pallas
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
-pub struct PallasCompressedElementWrapper {
-  repr: [u8; 32],
-}
-
-impl PallasCompressedElementWrapper {
-  /// Wraps repr into the wrapper
-  pub fn new(repr: [u8; 32]) -> Self {
-    Self { repr }
-  }
-}
-
-/// A wrapper for compressed group elements of vesta
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
-pub struct VestaCompressedElementWrapper {
-  repr: [u8; 32],
-}
-
-impl VestaCompressedElementWrapper {
-  /// Wraps repr into the wrapper
-  pub fn new(repr: [u8; 32]) -> Self {
-    Self { repr }
-  }
-}
+use ::grumpkin::bn256::{self, Point as Bn256G1, Affine as Bn256G1Affine, Compressed as Bn256G1Compressed};
+use ::grumpkin::grumpkin::{self, G1 as GrumpkinG1, G1Affine as GrumpkinG1Affine, G1Compressed as GrumpkinG1Compressed};
+//use halo2curves::bn256::{self, G1 as Bn256G1, G1Affine as Bn256G1Affine, G1Compressed as Bn256G1Compressed};
 
 macro_rules! impl_traits {
   (
@@ -72,11 +48,7 @@ macro_rules! impl_traits {
         scalars: &[Self::Scalar],
         bases: &[Self::PreprocessedGroupElement],
       ) -> Self {
-        if scalars.len() >= 128 {
-          pasta_msm::$name(bases, scalars)
-        } else {
           cpu_best_multiexp(scalars, bases)
-        }
       }
 
       #[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
@@ -92,7 +64,7 @@ macro_rules! impl_traits {
       }
 
       fn compress(&self) -> Self::CompressedGroupElement {
-        $name_compressed::new(self.to_bytes())
+        self.to_bytes()
       }
 
       fn from_label(label: &'static [u8], n: usize) -> Vec<Self::PreprocessedGroupElement> {
@@ -156,8 +128,8 @@ macro_rules! impl_traits {
       }
 
       fn get_curve_params() -> (Self::Base, Self::Base, BigInt) {
-        let A = Self::Base::zero();
-        let B = Self::Base::from(5);
+        let A = $name::Point::a();
+        let B = $name::Point::b();
         let order = BigInt::from_str_radix($order_str, 16).unwrap();
 
         (A, B, order)
@@ -187,36 +159,30 @@ macro_rules! impl_traits {
       type GroupElement = $name::Point;
 
       fn decompress(&self) -> Option<$name::Point> {
-        Some($name_curve::from_bytes(&self.repr).unwrap())
+        Some($name_curve::from_bytes(&self).unwrap())
       }
 
       fn as_bytes(&self) -> &[u8] {
-        &self.repr
+        &self.0
       }
     }
   };
 }
 
-impl<G: Group<Scalar = F>, F: PrimeField> ChallengeTrait<G> for F {
-  fn challenge(label: &'static [u8], transcript: &mut G::TE) -> Result<F, NovaError> {
-    transcript.squeeze_scalar(label)
-  }
-}
-
 impl_traits!(
-  pallas,
-  PallasCompressedElementWrapper,
-  Ep,
-  EpAffine,
-  "40000000000000000000000000000000224698fc0994a8dd8c46eb2100000001"
+  grumpkin,
+  GrumpkinG1Compressed,
+  GrumpkinG1,
+  GrumpkinG1Affine,
+  "30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001"
 );
 
 impl_traits!(
-  vesta,
-  VestaCompressedElementWrapper,
-  Eq,
-  EqAffine,
-  "40000000000000000000000000000000224698fc094cf91b992d30ed00000001"
+  bn256,
+  Bn256G1Compressed,
+  Bn256G1,
+  Bn256G1Affine,
+  "30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd47"
 );
 
 /// Native implementation of fast multiexp for platforms that do not support pasta_msm/semolina
@@ -341,39 +307,5 @@ fn cpu_best_multiexp<C: CurveAffine>(coeffs: &[C::Scalar], bases: &[C]) -> C::Cu
     let mut acc = C::Curve::identity();
     cpu_multiexp_serial(coeffs, bases, &mut acc);
     acc
-  }
-}
-
-#[cfg(test)]
-mod tests {
-  use super::*;
-  type G = pasta_curves::pallas::Point;
-
-  fn from_label_serial(label: &'static [u8], n: usize) -> Vec<EpAffine> {
-    let mut shake = Shake256::default();
-    shake.input(label);
-    let mut reader = shake.xof_result();
-    let mut gens = Vec::new();
-    for _ in 0..n {
-      let mut uniform_bytes = [0u8; 32];
-      reader.read_exact(&mut uniform_bytes).unwrap();
-      let hash = Ep::hash_to_curve("from_uniform_bytes");
-      gens.push(hash(&uniform_bytes).to_affine());
-    }
-    gens
-  }
-
-  #[test]
-  fn test_from_label() {
-    let label = b"test_from_label";
-    for n in [
-      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 1021,
-    ] {
-      let gens_par = <G as Group>::from_label(label, n);
-      let gens_ser = from_label_serial(label, n);
-      assert_eq!(gens_par.len(), n);
-      assert_eq!(gens_ser.len(), n);
-      assert_eq!(gens_par, gens_ser);
-    }
   }
 }

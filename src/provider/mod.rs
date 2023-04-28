@@ -5,6 +5,7 @@
 //! `EvaluationEngine` with an IPA-based polynomial evaluation argument
 
 pub mod ipa_pc;
+pub mod bn254_grumpkin;
 pub mod keccak;
 pub mod pasta;
 pub mod pedersen;

@@ -788,8 +788,10 @@ fn compute_digest<G: Group, T: Serialize>(o: &T) -> G::Scalar {
 #[cfg(test)]
 mod tests {
   use super::*;
-  type G1 = pasta_curves::pallas::Point;
-  type G2 = pasta_curves::vesta::Point;
+  //type G1 = pasta_curves::pallas::Point;
+  type G1 = ::grumpkin::bn256::Point;
+  //type G2 = pasta_curves::vesta::Point;
+  type G2 = ::grumpkin::grumpkin::Point;
   type EE1 = provider::ipa_pc::EvaluationEngine<G1>;
   type EE2 = provider::ipa_pc::EvaluationEngine<G2>;
   type S1 = spartan::RelaxedR1CSSNARK<G1, EE1>;

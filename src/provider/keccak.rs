@@ -101,7 +101,8 @@ mod tests {
   use ff::PrimeField;
   use sha3::{Digest, Keccak256};
 
-  type G = pasta_curves::pallas::Point;
+  //type G = pasta_curves::pallas::Point;
+  type G = ::grumpkin::grumpkin::Point;
 
   #[test]
   fn test_keccak_transcript() {

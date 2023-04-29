@@ -756,6 +756,7 @@ mod tests {
   };
   use ff::{Field, PrimeFieldBits};
   use pasta_curves::{arithmetic::CurveAffine, group::Curve, pallas, vesta};
+  use ::grumpkin::{bn256, grumpkin};
   use rand::rngs::OsRng;
 
   #[derive(Debug, Clone)]
@@ -896,6 +897,8 @@ mod tests {
   fn test_ecc_ops() {
     test_ecc_ops_with::<pallas::Affine, pallas::Point>();
     test_ecc_ops_with::<vesta::Affine, vesta::Point>();
+    test_ecc_ops_with::<bn256::Affine, bn256::Point>();
+    test_ecc_ops_with::<grumpkin::Affine, grumpkin::Point>();
   }
 
   fn test_ecc_ops_with<C, G>()
@@ -977,6 +980,8 @@ mod tests {
   fn test_ecc_circuit_ops() {
     test_ecc_circuit_ops_with::<pallas::Base, pallas::Scalar, pallas::Point, vesta::Point>();
     test_ecc_circuit_ops_with::<vesta::Base, vesta::Scalar, vesta::Point, pallas::Point>();
+    test_ecc_circuit_ops_with::<bn256::Base, bn256::Scalar, bn256::Point, grumpkin::Point>();
+    test_ecc_circuit_ops_with::<grumpkin::Base, grumpkin::Scalar, grumpkin::Point, bn256::Point>();
   }
 
   fn test_ecc_circuit_ops_with<B, S, G1, G2>()
@@ -1029,6 +1034,8 @@ mod tests {
   fn test_ecc_circuit_add_equal() {
     test_ecc_circuit_add_equal_with::<pallas::Base, pallas::Scalar, pallas::Point, vesta::Point>();
     test_ecc_circuit_add_equal_with::<vesta::Base, vesta::Scalar, vesta::Point, pallas::Point>();
+    test_ecc_circuit_add_equal_with::<bn256::Base, bn256::Scalar, bn256::Point, grumpkin::Point>();
+    test_ecc_circuit_add_equal_with::<grumpkin::Base, grumpkin::Scalar, grumpkin::Point, bn256::Point>();
   }
 
   fn test_ecc_circuit_add_equal_with<B, S, G1, G2>()
@@ -1086,6 +1093,8 @@ mod tests {
     test_ecc_circuit_add_negation_with::<pallas::Base, pallas::Scalar, pallas::Point, vesta::Point>(
     );
     test_ecc_circuit_add_negation_with::<vesta::Base, vesta::Scalar, vesta::Point, pallas::Point>();
+    test_ecc_circuit_add_negation_with::<bn256::Base, bn256::Scalar, bn256::Point, grumpkin::Point>();
+    test_ecc_circuit_add_negation_with::<grumpkin::Base, grumpkin::Scalar, grumpkin::Point, bn256::Point>();
   }
 
   fn test_ecc_circuit_add_negation_with<B, S, G1, G2>()

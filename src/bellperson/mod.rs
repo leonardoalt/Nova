@@ -41,7 +41,8 @@ mod tests {
 
   #[test]
   fn test_alloc_bit() {
-    type G = pasta_curves::pallas::Point;
+    //type G = pasta_curves::pallas::Point;
+    type G = ::grumpkin::grumpkin::Point;
 
     // First create the shape
     let mut cs: ShapeCS<G> = ShapeCS::new();

@@ -201,9 +201,12 @@ where
 #[cfg(test)]
 mod tests {
   use super::*;
-  type S = pasta_curves::pallas::Scalar;
-  type B = pasta_curves::vesta::Scalar;
-  type G = pasta_curves::pallas::Point;
+  //type S = pasta_curves::pallas::Scalar;
+  type S = ::grumpkin::bn256::Scalar;
+  //type B = pasta_curves::vesta::Scalar;
+  type B = ::grumpkin::grumpkin::Scalar;
+  //type G = pasta_curves::pallas::Point;
+  type G = ::grumpkin::bn256::Point;
   use crate::{
     bellperson::solver::SatisfyingAssignment, constants::NUM_CHALLENGE_BITS,
     gadgets::utils::le_bits_to_num,

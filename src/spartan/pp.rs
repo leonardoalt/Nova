@@ -2191,7 +2191,9 @@ impl<G: Group, EE: EvaluationEngineTrait<G, CE = G::CE>, C: StepCircuit<G::Scala
 #[cfg(test)]
 mod tests {
   use super::*;
-  type G = pasta_curves::pallas::Point;
+  //type G = pasta_curves::pallas::Point;
+  //type G = ::grumpkin::bn256::Point;
+  type G = ::grumpkin::grumpkin::Point;
   type EE = crate::provider::ipa_pc::EvaluationEngine<G>;
   use ::bellperson::{gadgets::num::AllocatedNum, ConstraintSystem, SynthesisError};
   use core::marker::PhantomData;

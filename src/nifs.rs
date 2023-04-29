@@ -126,8 +126,10 @@ mod tests {
   use ff::{Field, PrimeField};
   use rand::rngs::OsRng;
 
-  type S = pasta_curves::pallas::Scalar;
-  type G = pasta_curves::pallas::Point;
+  //type S = pasta_curves::pallas::Scalar;
+  type S = ::grumpkin::bn256::Scalar;
+  //type G = pasta_curves::pallas::Point;
+  type G = ::grumpkin::bn256::Point;
 
   fn synthesize_tiny_r1cs_bellperson<Scalar: PrimeField, CS: ConstraintSystem<Scalar>>(
     cs: &mut CS,
